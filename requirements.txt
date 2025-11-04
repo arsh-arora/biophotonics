@@ -1,0 +1,62 @@
+# Core Scientific Computing
+numpy>=1.24.0,<2.0.0
+scipy>=1.10.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Deep Learning Framework (GPU Support)
+# For CUDA GPU (NVIDIA):
+#   - Install PyTorch with CUDA from https://pytorch.org/get-started/locally/
+#   - Example: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# For Apple Silicon MPS:
+#   - Use default PyTorch (MPS support built-in for torch>=2.0)
+# For CPU only:
+#   - Use default PyTorch
+torch>=2.0.0,<2.5.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Gaussian Process Library (GPU Support via PyTorch)
+gpytorch>=1.11.0
+
+# Stochastic Differential Equations (GPU Support via PyTorch)
+torchsde>=0.2.6
+
+# Machine Learning Utilities
+scikit-learn>=1.3.0
+
+# Optional: Data handling
+pandas>=2.0.0
+
+# Optional: Jupyter notebook support
+# jupyter>=1.0.0
+# ipykernel>=6.25.0
+
+# ============================================================================
+# GPU Installation Instructions
+# ============================================================================
+#
+# NVIDIA CUDA (Linux/Windows):
+# ------------------------------
+# 1. Install CUDA Toolkit 11.8 or 12.1 from https://developer.nvidia.com/cuda-downloads
+# 2. Install PyTorch with CUDA:
+#    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#    (Replace cu118 with cu121 for CUDA 12.1)
+#
+# Apple Silicon MPS (macOS):
+# --------------------------
+# PyTorch with MPS support is included by default in torch>=2.0
+# Simply install: pip install torch torchvision torchaudio
+# Note: GPyTorch may have MPS compatibility issues (uses CPU fallback)
+#
+# CPU Only:
+# ---------
+# Install default PyTorch: pip install torch torchvision torchaudio
+#
+# Verify GPU availability:
+# ------------------------
+# import torch
+# print(f"CUDA available: {torch.cuda.is_available()}")
+# print(f"MPS available: {torch.backends.mps.is_available()}")
+# if torch.cuda.is_available():
+#     print(f"GPU: {torch.cuda.get_device_name(0)}")
