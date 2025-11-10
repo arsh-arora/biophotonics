@@ -423,6 +423,13 @@ def generate_markdown_report(leaderboard, all_results, data_info):
 - **TCN with NLL:** Probabilistic TCN with uncertainty estimation
 - **TCN Ensemble:** Multiple TCN models with averaging
 
+#### C1f-j) Bidirectional TCN Variants
+- **Bidirectional TCN:** Non-causal TCN with forward + backward processing
+- **Bidirectional TCN (Fixed):** Improved with batch normalization and weight normalization
+- **Bidirectional TCN (Multi-Scale):** Parallel branches at multiple scales
+- **Bidirectional TCN (NLL):** Probabilistic with mean + log-variance outputs
+- **Bidirectional TCN (Ensemble):** Multiple models for robust predictions
+
 #### C2) GRU-D (Gated Recurrent Unit with Decay)
 - **Description:** Recurrent network with time-aware decay for irregular sampling
 - **Pros:** Handles irregular time gaps naturally, interpretable decay
@@ -606,6 +613,11 @@ method_mapping = {
     # '11_csdi': ('11_csdi.py', 'CSDI'),  # Skipped per user request
     '12_neural_sde': ('12_neural_sde.py', 'Neural SDE (OU Prior)'),
     '13_gp_ou_rbf': ('13_gp_ou_rbf.py', 'Hybrid GP (OU + RBF)'),
+    '15_tcn_bidirectional': ('15_tcn_bidirectional.py', 'Bidirectional TCN'),
+    '15_tcn_bidirectional_fixed': ('15_tcn_bidirectional_fixed.py', 'Bidirectional TCN (Fixed)'),
+    '15_tcn_bidirectional_multiscale': ('15_tcn_bidirectional_multiscale.py', 'Bidirectional TCN (Multi-Scale)'),
+    '15_tcn_bidirectional_nll': ('15_tcn_bidirectional_nll.py', 'Bidirectional TCN (NLL)'),
+    '15_tcn_bidirectional_ensemble': ('15_tcn_bidirectional_ensemble.py', 'Bidirectional TCN (Ensemble)'),
 }
 
 
