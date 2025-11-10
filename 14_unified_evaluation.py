@@ -11,14 +11,15 @@ A) Deterministic Baselines:
    - LOESS
 
 B) Physics-based Probabilistic:
-   - OU Kalman Smoother
+   - OU Kalman Smoother (univariate + multivariate)
+   - GP with OU Kernel
    - State-Space GP with OU prior
    - Hybrid GP (OU + RBF)
 
 C) Learning-based:
-   - TCN (Temporal Convolutional Network)
+   - TCN (Temporal Convolutional Network) + variants
+   - GRU-D (Gated Recurrent Units with Decay)
    - SAITS (Self-Attention Imputation)
-   - CSDI (Diffusion Model)
 
 D) Hybrid Physics-Informed:
    - Neural SDE with OU prior
@@ -29,8 +30,8 @@ Metrics:
 
 Output:
 - Leaderboard ranked by MAE
-- Comprehensive Markdown report
-- Saved predictions (.npy files)
+- Comprehensive Markdown report with visualizations
+- Saved predictions and plots (.png files)
 """
 
 import os
@@ -212,9 +213,15 @@ def run_method(script_name, method_name):
         print(result.stdout)
 
         # Check if output files were generated
-        output_file = script_name.replace('.py', '_result.png')
-        if os.path.exists(output_file):
-            print(f"✓ Generated: {output_file}")
+        base_name = script_name.replace('.py', '')
+        output_files = [
+            f"{base_name}_result.png",
+            f"{base_name}_zoom.png",
+            f"{base_name}_predictions.npy"
+        ]
+        for output_file in output_files:
+            if os.path.exists(output_file):
+                print(f"✓ Generated: {output_file}")
 
         return {
             'status': 'success',
@@ -379,12 +386,22 @@ def generate_markdown_report(leaderboard, all_results, data_info):
 - **Pros:** Principled uncertainty, optimal filtering, interpretable parameters
 - **Cons:** Assumes exact OU dynamics, Gaussian noise
 
-#### B4) State-Space GP with OU Prior
-- **Description:** Gaussian Process with Matérn-1/2 kernel (equivalent to OU)
-- **Pros:** Non-parametric, marginal likelihood optimization, O(N) complexity
+#### B2) OU Kalman Multivariate
+- **Description:** Multivariate extension of OU Kalman for joint trajectory components
+- **Pros:** Handles cross-correlations between dimensions
+- **Cons:** Increased computational complexity
+
+#### B3) GP with OU Kernel
+- **Description:** Gaussian Process with Matérn-1/2 (OU) covariance kernel
+- **Pros:** Closed-form kernel, efficient inference, uncertainty quantification
 - **Cons:** Limited to OU covariance structure
 
-#### D2) Hybrid GP (OU + RBF)
+#### B4) State-Space GP with OU Prior
+- **Description:** State-space formulation of GP with OU prior for O(N) complexity
+- **Pros:** Linear time complexity, marginal likelihood optimization
+- **Cons:** Limited to Markovian kernels
+
+#### B5) Hybrid GP (OU + RBF)
 - **Description:** k_total = k_OU + k_RBF(short lengthscale)
 - **Pros:** Separates physics from residuals, interpretable decomposition
 - **Cons:** More hyperparameters to optimize
@@ -399,16 +416,23 @@ def generate_markdown_report(leaderboard, all_results, data_info):
 - **Pros:** Large receptive field, GPU acceleration, excellent performance
 - **Cons:** Requires training data, black-box
 
+#### C1a-e) TCN Variants
+- **TCN Fixed:** Improved architecture with better normalization
+- **TCN Multi-Scale:** Multiple dilation rates for multi-resolution features
+- **TCN Multi-Scale Fixed:** Combined improvements
+- **TCN with NLL:** Probabilistic TCN with uncertainty estimation
+- **TCN Ensemble:** Multiple TCN models with averaging
+
+#### C2) GRU-D (Gated Recurrent Unit with Decay)
+- **Description:** Recurrent network with time-aware decay for irregular sampling
+- **Pros:** Handles irregular time gaps naturally, interpretable decay
+- **Cons:** Sequential processing (slower than TCN), gradient issues
+
 #### C3) SAITS (Self-Attention Imputation)
 - **Description:** Transformer encoder with value+mask embeddings and positional encoding
 - **Architecture:** 3 layers, d_model=128, 4 attention heads
 - **Pros:** Captures long-range dependencies, interpretable attention
 - **Cons:** Computationally expensive, many parameters
-
-#### C4) CSDI (Conditional Score-based Diffusion)
-- **Description:** Diffusion model with 1D U-Net backbone, 50 diffusion steps
-- **Pros:** Uncertainty quantification via multiple samples (K=20), state-of-the-art generative model
-- **Cons:** Slow inference, computationally expensive
 
 ---
 
@@ -461,15 +485,15 @@ def generate_markdown_report(leaderboard, all_results, data_info):
 
     # Add plots for each method
     for name, metrics in leaderboard:
-        script_num = None
+        script_file = None
         for num, (script, method_name) in method_mapping.items():
             if method_name == name:
-                script_num = num
+                script_file = script.replace('.py', '')
                 break
 
-        if script_num:
-            result_img = f"{script_num}_result.png"
-            zoom_img = f"{script_num}_zoom.png"
+        if script_file:
+            result_img = f"{script_file}_result.png"
+            zoom_img = f"{script_file}_zoom.png"
 
             if os.path.exists(result_img):
                 md_content += f"### {name}\n\n"
@@ -568,10 +592,18 @@ method_mapping = {
     '02_bandlimited_resampling': ('02_bandlimited_resampling.py', 'Band-limited Resampling'),
     '03_loess': ('03_loess.py', 'LOESS'),
     '04_ou_kalman': ('04_ou_kalman.py', 'OU Kalman Smoother'),
+    '05_ou_kalman_multivariate': ('05_ou_kalman_multivariate.py', 'OU Kalman Multivariate'),
+    '06_gp_ou': ('06_gp_ou.py', 'GP with OU Kernel'),
     '07_ssm_gp_ou': ('07_ssm_gp_ou.py', 'State-Space GP (OU)'),
     '08_tcn': ('08_tcn.py', 'TCN'),
+    '08_tcn_fixed': ('08_tcn_fixed.py', 'TCN Fixed'),
+    '08_tcn_multiscale': ('08_tcn_multiscale.py', 'TCN Multi-Scale'),
+    '08_tcn_multiscale_fixed': ('08_tcn_multiscale_fixed.py', 'TCN Multi-Scale Fixed'),
+    '08_tcn_nll': ('08_tcn_nll.py', 'TCN with NLL'),
+    '08_tcn_ensemble': ('08_tcn_ensemble.py', 'TCN Ensemble'),
+    '09_gru_d': ('09_gru_d.py', 'GRU-D'),
     '10_saits': ('10_saits.py', 'SAITS'),
-    '11_csdi': ('11_csdi.py', 'CSDI'),
+    # '11_csdi': ('11_csdi.py', 'CSDI'),  # Skipped per user request
     '12_neural_sde': ('12_neural_sde.py', 'Neural SDE (OU Prior)'),
     '13_gp_ou_rbf': ('13_gp_ou_rbf.py', 'Hybrid GP (OU + RBF)'),
 }
